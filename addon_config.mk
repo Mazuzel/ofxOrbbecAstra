@@ -24,4 +24,4 @@ osx:
 	ADDON_DLLS_TO_COPY  = libs/astra/lib/osx/
 	
 vs:	
-	ADDON_DLLS_TO_COPY  = dlls_to_copy/win32
+	ADDON_DLLS_TO_COPY  = dlls_to_copy/win64
