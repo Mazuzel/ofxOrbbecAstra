@@ -55,6 +55,17 @@ namespace astra {
             : ImageFrame(frame, ASTRA_PIXEL_FORMAT_RGB888)
         {}
     };
+
+#ifdef __ANDROID__
+    class NV21ColorFrame : public ImageFrame<uint8_t, ASTRA_STREAM_COLOR>
+    {
+    public:
+        NV21ColorFrame(astra_imageframe_t frame)
+        : ImageFrame(frame, ASTRA_PIXEL_FORMAT_NV21)
+        {}
+    };
+#endif
+
 }
 
 #endif // ASTRA_COLOR_HPP
