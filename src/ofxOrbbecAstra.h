@@ -11,6 +11,7 @@
 #include "ofMain.h"
 #include <astra/astra.hpp>
 #include <astra/capi/astra.h>
+#include <chrono>
 
 class ofxOrbbecAstra : public astra::FrameListener {
 
@@ -43,8 +44,8 @@ public:
 	void drawDepth(float x = 0, float y = 0, float w = 0, float h = 0);
 
 #ifndef TARGET_OSX
-    ofVec2f getJointPosition(int body_id, int joint_id);
-    ofVec2f getNomalisedJointPosition(int body_id, int joint_id);
+    ofDefaultVec2 getJointPosition(int body_id, int joint_id);
+    ofDefaultVec2 getNomalisedJointPosition(int body_id, int joint_id);
     vector<astra::Joint>& getJointPositions(int body_id);
     int getNumBodies();
     int getNumJoints(int body_id);
@@ -52,7 +53,7 @@ public:
     string getJointName(astra::JointType id);
 #endif
     
-	ofVec3f getWorldCoordinateAt(int x, int y);    
+	ofDefaultVec3 getWorldCoordinateAt(int x, int y);    
 
 	unsigned short getNearClip();
 	unsigned short getFarClip();
@@ -60,12 +61,16 @@ public:
 	ofShortPixels& getRawDepth();
 	ofImage& getDepthImage();
 	ofImage& getColorImage();
+	vector<ofDefaultVec3>& getPoints();
 
-    map<int32_t,ofVec2f>& getHandsDepth();
-    map<int32_t,ofVec3f>& getHandsWorld();
+    map<int32_t,ofDefaultVec2>& getHandsDepth();
+    map<int32_t,ofDefaultVec3>& getHandsWorld();
 
     float getCameraWidth() {return cameraWidth;}
     float getCameraHeight() {return cameraHeight;}
+
+	float getFrameRate() { return frameRate; }
+
 
 protected:
 
@@ -85,6 +90,8 @@ protected:
 	unsigned short nearClip;
 	unsigned short farClip;
 	int maxDepth;
+	float frameRate;
+	std::chrono::steady_clock::time_point lastFrameTime;
 
 	ofShortPixels depthPixels;
 	ofImage depthImage;
@@ -96,10 +103,10 @@ protected:
 	shared_ptr<ofVideoGrabber> grabber;
 
 	vector<char> depthLookupTable;
-	vector<ofVec3f> cachedCoords;
+	vector<ofDefaultVec3> cachedCoords;
 
-    map<int32_t,ofVec2f> handMapDepth;
-    map<int32_t,ofVec3f> handMapWorld;
+    map<int32_t,ofDefaultVec2> handMapDepth;
+    map<int32_t,ofDefaultVec3> handMapWorld;
 
 #ifndef TARGET_OSX
     vector<vector<astra::Joint>> joints;

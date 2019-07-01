@@ -19,6 +19,7 @@ ofxOrbbecAstra::ofxOrbbecAstra() {
 	bSetup = false;
 	bIsFrameNew = false;
 	bDepthImageEnabled = true;
+	frameRate = 0.f;
 }
 
 ofxOrbbecAstra::~ofxOrbbecAstra() {
@@ -219,6 +220,9 @@ void ofxOrbbecAstra::on_frame_ready(astra::StreamReader& reader,
 									astra::Frame& frame)
 {
 	bIsFrameNew = true;
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	frameRate		= 1000.f / (std::chrono::duration<double, std::milli>(now - lastFrameTime).count());
+	lastFrameTime	= now;
 
 	auto colorFrame = frame.get<astra::ColorFrame>();
     auto depthFrame = frame.get<astra::DepthFrame>();
@@ -264,8 +268,8 @@ void ofxOrbbecAstra::on_frame_ready(astra::StreamReader& reader,
 				const auto& depthPos = handPoint.depth_position();
 				const auto& worldPos = handPoint.world_position();
 
-				handMapDepth[id] = ofVec2f(depthPos.x, depthPos.y);
-				handMapWorld[id] = ofVec3f(worldPos.x, worldPos.y, worldPos.z);
+				handMapDepth[id] = ofDefaultVec2(depthPos.x, depthPos.y);
+				handMapWorld[id] = ofDefaultVec3(worldPos.x, worldPos.y, worldPos.z);
 			} else {
 				handMapDepth.erase(id);
 				handMapWorld.erase(id);
@@ -313,7 +317,7 @@ void ofxOrbbecAstra::updateDepthLookupTable() {
 
 }
 
-ofVec3f ofxOrbbecAstra::getWorldCoordinateAt(int x, int y) {
+ofDefaultVec3 ofxOrbbecAstra::getWorldCoordinateAt(int x, int y) {
     return cachedCoords[int(y) * cameraWidth + int(x)];
 }
 
@@ -333,12 +337,12 @@ vector<astra::Joint>& ofxOrbbecAstra::getJointPositions(int body_id) {
     return joints.at(body_id);
 }
 
-ofVec2f ofxOrbbecAstra::getNomalisedJointPosition(int body_id, int joint_id) {
-    return ofVec2f(joints[body_id][joint_id].depth_position().x/cameraWidth,joints[body_id][joint_id].depth_position().y/cameraHeight);
+ofDefaultVec2 ofxOrbbecAstra::getNomalisedJointPosition(int body_id, int joint_id) {
+    return ofDefaultVec2(joints[body_id][joint_id].depth_position().x/cameraWidth,joints[body_id][joint_id].depth_position().y/cameraHeight);
 }
 
-ofVec2f ofxOrbbecAstra::getJointPosition(int body_id, int joint_id) {
-    return ofVec2f(joints[body_id][joint_id].depth_position().x/cameraWidth*ofGetWidth(),joints[body_id][joint_id].depth_position().y/cameraHeight*ofGetHeight());
+ofDefaultVec2 ofxOrbbecAstra::getJointPosition(int body_id, int joint_id) {
+    return ofDefaultVec2(joints[body_id][joint_id].depth_position().x/cameraWidth*ofGetWidth(),joints[body_id][joint_id].depth_position().y/cameraHeight*ofGetHeight());
 }
 
 astra::JointType ofxOrbbecAstra::getJointType(int body_id, int joint_id) {
@@ -414,10 +418,15 @@ ofImage& ofxOrbbecAstra::getColorImage() {
 	return colorImage;
 }
 
-map<int32_t,ofVec2f>& ofxOrbbecAstra::getHandsDepth() {
+vector<ofDefaultVec3>& ofxOrbbecAstra::getPoints()
+{
+	return cachedCoords;
+}
+
+map<int32_t,ofDefaultVec2>& ofxOrbbecAstra::getHandsDepth() {
 	return handMapDepth;
 }
 
-map<int32_t,ofVec3f>& ofxOrbbecAstra::getHandsWorld() {
+map<int32_t,ofDefaultVec3>& ofxOrbbecAstra::getHandsWorld() {
 	return handMapWorld;
 }
